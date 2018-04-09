@@ -13,19 +13,22 @@ import re
 # Code for Agilent 8164B mainframe, with a laser setup on module 0
 # and power meter setup on module 1
 class Agilent8164B:
-    def __init__(self, gpib_address = 20, verbose = True):
+    def __init__(self, resourcemanager, gpib_address = 20, wait = 0.5, verbose = True):
 
         self.verbose = verbose
+        self.gpib_address = gpib_address
+        self.resource = resourcemanager.open_resource("GPIB::" + str(self.gpib_address))
+        self.wait = wait
 
         # Logging features don't work with the old pyvisa
-        self.legacy = (float(visa.__version__) < 1.6)
+        # self.legacy = (float(visa.__version__) < 1.6)
 
-        if self.legacy:
-            self.gpib = visa.instrument("GPIB::%d" % (gpib_address))
-        else:
-            self.gpib = visa.ResourceManager().open_resource("GPIB::%d" % (gpib_address))
+        # if self.legacy:
+            # self.gpib = visa.instrument("GPIB::%d" % (gpib_address))
+        # else:
+            # self.gpib = visa.ResourceManager().open_resource("GPIB::%d" % (gpib_address))
 
-        self.gpib.clear()
+        # self.gpib.clear()
 
     def set_avg_time(self, avg_time, unit = 'ms'):
         self.gpib.write(":SENS%d:POW:ATIME %d%s" % (1, avg_time, unit))
@@ -116,12 +119,13 @@ class Agilent8164B:
             return data2
 
 if __name__=='__main__':
-    power_meter = Agilent8164B(gpib_address=20)
+    rm = visa.Resourcemanager()
+    power_meter = Agilent8164B(rm, gpib_address=20)
 
-    temp = power_meter.log_power(samples = 20001, avg_time = 0.005, slot = 1, \
-        ext_trig = True, dbm = True, \
-        log_1 = False, log_2 = True)
+    # temp = power_meter.log_power(samples = 20001, avg_time = 0.005, slot = 1, \
+        # ext_trig = True, dbm = True, \
+        # log_1 = False, log_2 = True)
 
-    for i in range(len(temp)):
-        print "%d: %f dBm" % (i, temp[i])
+    # for i in range(len(temp)):
+        # print "%d: %f dBm" % (i, temp[i])
     #print power_meter.read_power(read_1 = False, read_2 = True)

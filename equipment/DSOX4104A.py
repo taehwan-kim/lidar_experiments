@@ -15,10 +15,18 @@ class DSOX4104A:
         self.wait = wait
         self.scope.clear()
 
-    def setTrigger(self, channel = 1, edge = "pos"):
+    def setTrigger(self, edge = "pos", channel = 2):
 
-        self.scope.write(":trig:sour chan%d" % channel)
+        if channel == "EXT":
+            self.scope.write(":trig:sour EXT")
+        else:
+            self.scope.write(":trig:sour chan%s" % channel)
         self.scope.write(":trig:slop %s" % edge)
+    
+    # def setTrigger(self, channel = 1, edge = "pos"):
+
+        # self.scope.write(":trig:sour chan%d" % channel)
+        # self.scope.write(":trig:slop %s" % edge)
     
     def setAcquisition(self, mode = "hres"):
 
@@ -34,7 +42,7 @@ class DSOX4104A:
         self.scope.write(":chan%d:scal %fmV" % (channel, scale))
 
     def takeWaveform(self, numCycles = 1, channel = 1, timerange = 1e-7, wformat = "ascii", \
-            wpoints = 4000, wpointsmax = 1):
+            wpoints = 4000, wpointsmax = 1, timeposition = 100e-6):
         
         # self.scope.write(":SYS:HEAD OFF")
         if wpointsmax == 1:
@@ -46,6 +54,7 @@ class DSOX4104A:
         #scope.write(":WAVEFORM:FORMAT ASCII")
         self.scope.write(":wav:sour chan%d" % channel)
 
+        self.scope.write(":tim:pos %g" % timeposition)
         self.scope.write(":tim:rang %g" % timerange)    
 
         time_step = float(self.scope.query(":wav:xinc?"))

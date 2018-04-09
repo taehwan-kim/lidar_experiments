@@ -13,20 +13,22 @@ import visa
 # import PowerMeter
 
 # Main thing
-def wavecapture(file_name, numofsamples, wrange, wptnum, yrange):
+def wavecapture(file_name, numofsamples, wrange, wptnum, yrange, timpos):
 
     rm = visa.ResourceManager()
     scope = DSOX4104A.DSOX4104A(rm)
     # osa = AQ6370D.AQ6370D(rm, 1, 0.1) 
     # keithley = Keithley2400.Keithley2400(rm, 24, 0.1)
-    scope.setTrigger(channel=2, edge="pos")
+    scope.setTrigger(channel = "EXT", edge="pos")
     scope.setAcquisition(mode = "hres")
 
-    scope.setChannelOption(channel=1, coupling="DC", bwlimit=0, display=1, impedance="FIFT", scale=yrange)
-    scope.setChannelOption(channel=2, coupling="DC", bwlimit=0, display=0, impedance="FIFT", scale=100.0)
+    scope.setChannelOption(channel=1, coupling="AC", bwlimit=0, display=1, impedance="FIFT", scale=yrange)
+    scope.setChannelOption(channel=2, coupling="DC", bwlimit=0, display=0, impedance="ONEM", scale=1000.0)
+    scope.setChannelOption(channel=3, coupling="DC", bwlimit=0, display=0, impedance="FIFT", scale=1000.0)
+    scope.setChannelOption(channel=4, coupling="DC", bwlimit=0, display=0, impedance="FIFT", scale=1000.0)
 
     tmeas, wmeas = scope.takeWaveform(numCycles=numofsamples, channel=1, timerange=wrange, \
-            wpoints=wptnum, wpointsmax=0)
+            wpoints=wptnum, wpointsmax=0, timeposition=timpos)
 
 
     # current = arange(start,stop,step)
@@ -119,9 +121,9 @@ def wavecapture(file_name, numofsamples, wrange, wptnum, yrange):
 # Run the program
 if __name__ == "__main__":
     
-    if not len(sys.argv) == 5:
+    if not len(sys.argv) == 6:
         print "USAGE:"  
-        print "    Wavecapture numofsamples wrange wptnum yrange"
+        print "    Wavecapture numofsamples wrange wptnum yrange timpos"
         # label start stop step"
         sys.exit(1)
 
@@ -134,6 +136,6 @@ if __name__ == "__main__":
     # Create results directory
     file_name = "%s/result_%s-%s-%s" % (dir_name, date_time[0:10], date_time[11:13], date_time[14:16])
     # file_handle = open(file_name, 'w')
-    wavecapture(file_name, int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), float(sys.argv[4]))
+    wavecapture(file_name, int(sys.argv[1]), float(sys.argv[2]), int(sys.argv[3]), float(sys.argv[4]), float(sys.argv[5]))
     # print measured
     sys.exit(0)
